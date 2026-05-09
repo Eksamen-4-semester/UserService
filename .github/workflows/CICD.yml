@@ -1,0 +1,33 @@
+name: Build and test AuthService
+
+on:
+  push:
+    branches: ["main"]
+
+
+env:
+  DOTNET_VERSION: 10.x
+  API_PROJ_PATH: ./UserAPI/UserAPI.csproj
+  UNIT_TEST_PROJ_PATH: ./UserAPI.UnitTest/UserAPI.UnitTest.csproj
+
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore
+        run: dotnet restore ${{ env.API_PROJ_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.API_PROJ_PATH }} --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: dotnet test ${{ env.UNIT_TEST_PROJ_PATH }} --configuration Release --no-restore --no-build
