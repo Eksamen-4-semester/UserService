@@ -1,7 +1,7 @@
 ﻿namespace UserAPI.UnitTest;
 
 [TestClass]
-public sealed class Test1
+public sealed class MemberControllerTests
 {
     [TestMethod]
     public void TestMethod1()
