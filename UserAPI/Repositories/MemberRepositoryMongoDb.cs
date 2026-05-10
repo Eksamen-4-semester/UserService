@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using UserAPI.Models;
+using UserAPI.Models.ResultObjects;
 using UserAPI.Repositories.Interfaces;
 
 namespace UserAPI.Repositories;
@@ -104,9 +105,88 @@ public class MemberRepositoryMongoDb : IMemberRepository
         }
     }
 
-    public Task<Member?> GetMemberById(int id)
+    public async Task<Member?> GetMemberById(int id)
     {
-        throw new NotImplementedException();
+        var filter = Builders<Member>.Filter.Eq("_id", id);
+        var projection = Builders<Member>.Projection.Exclude("Password");
+        return await _memberCollection.Find(filter).Project<Member>(projection).FirstOrDefaultAsync();
+    }
+
+    public async Task<ActivationResult> DeactivateMember(int id)
+    {
+        var actResult = new ActivationResult();
+        var filter = Builders<Member>.Filter.Eq("_id", id);
+        var member = await _memberCollection.Find(filter).FirstOrDefaultAsync();
+        if (member == null)
+        {
+            _logger.LogError("DeactivateMember failed, member not found");
+            actResult.ResultType = ActivationResultType.NotFound;
+            actResult.ErrorMessage = $"Member {id} not found";
+            return actResult;
+        }
+
+        if (!member.Active)
+        {
+            _logger.LogError("DeactivateMember failed, member already deactivated");
+            actResult.ResultType = ActivationResultType.NoChange;
+            actResult.ErrorMessage = $"Member {id} is already not active";
+            return actResult;
+        }
+
+        try
+        {
+            member.Active = false;
+            member.InactiveDate = DateTime.UtcNow;
+            await _memberCollection.ReplaceOneAsync(filter, member);
+            actResult.ResultType = ActivationResultType.Success;
+            actResult.ErrorMessage = null;
+            _logger.LogInformation("DeactivateMember success, member {Username} deactivated", member.Username);
+            return actResult;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "DeactivateMember failed, exception occured");
+            actResult.ResultType = ActivationResultType.InternalError;
+            actResult.ErrorMessage = "Server failed to deactivate member";
+            return actResult;
+        }
+    }
+
+    public async Task<ActivationResult> ActivateMember(int id)
+    {
+        var actResult = new ActivationResult();
+        var filter = Builders<Member>.Filter.Eq("_id", id);
+        var member = await _memberCollection.Find(filter).FirstOrDefaultAsync();
+        if (member == null)
+        {
+            actResult.ResultType = ActivationResultType.NotFound;
+            actResult.ErrorMessage = $"Member {id} not found";
+            return actResult;
+        }
+
+        if (member.Active)
+        {
+            actResult.ResultType = ActivationResultType.NoChange;
+            actResult.ErrorMessage = $"Member {id} is already active";
+            return actResult;
+        }
+
+        try
+        {
+            member.Active = true;
+            member.InactiveDate = null;
+            await _memberCollection.ReplaceOneAsync(filter, member);
+            actResult.ResultType = ActivationResultType.Success;
+            actResult.ErrorMessage = null;
+            return actResult;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "DeactivateMember failed");
+            actResult.ResultType = ActivationResultType.InternalError;
+            actResult.ErrorMessage = "Server failed to deactivate member";
+            return actResult;
+        }
     }
 
     private async Task<Member?> GetMemberByUsername(string username)

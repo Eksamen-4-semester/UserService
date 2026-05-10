@@ -1,3 +1,3 @@
 ﻿namespace UserAPI.Models;
 
-public record PersonalTrainerDto(string Name, string Username, string Password);
+public record PersonalTrainerDto(string FullName, string Username, string Password);

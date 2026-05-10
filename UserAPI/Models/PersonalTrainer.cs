@@ -9,7 +9,7 @@ public class PersonalTrainer
     [BsonId]
     public int PersonalTrainerId { get; set; }
     [Required]
-    public string Name { get; set; }
+    public string FullName { get; set; }
     [Required]
     public string Username { get; set; }
     public string Password { get; set; }
