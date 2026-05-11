@@ -18,7 +18,7 @@ public class VersionController : ControllerBase
     [HttpGet]
     public async Task<Dictionary<string,string>> GetVersion()
     {
-        _logger.LogInformation("Version controll endpoint called for AuthService");
+        _logger.LogInformation("Version control endpoint called for UserService");
         var properties = new Dictionary<string, string>();
         var assembly = typeof(Program).Assembly;
         properties.Add("service", "FitLife Auth service");

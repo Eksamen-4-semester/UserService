@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UserAPI.Models;
 using UserAPI.Repositories.Interfaces;
 
@@ -43,6 +44,7 @@ public class PersonalTrainerController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     [Route("register")]
     public async Task<IActionResult> CreatePersonalTrainer([FromBody] PersonalTrainerDto trainer)
