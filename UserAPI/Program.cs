@@ -57,7 +57,7 @@ try
     // TODO set to "mongodb://localhost:27017/" in local dev without docker
     Environment.SetEnvironmentVariable("MONGO_CONNECTION_STRING", connectionString);
     
-    string mongoDbName = mongoSecrets.Data.Data["MONGO_DATABASE_NAME"].ToString();
+    string mongoDbName = mongoSecrets.Data.Data["MONGO_USER_DB"].ToString();
     if (string.IsNullOrWhiteSpace(mongoDbName))
         throw new NullReferenceException("MONGO_DATABASE_NAME not found");
     Console.WriteLine(mongoDbName);
