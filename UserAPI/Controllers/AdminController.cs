@@ -46,7 +46,7 @@ public class AdminController : ControllerBase
         return Ok(result);
     }
     
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [HttpPost]
     [Route("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
