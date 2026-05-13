@@ -128,6 +128,16 @@ builder.Services.AddScoped<IMongoDatabase>(sp =>
 builder.Services.AddScoped<IAdminRepository, AdminRepositoryMongoDb>();
 builder.Services.AddScoped<IMemberRepository, MemberRepositoryMongoDb>();
 builder.Services.AddScoped<IPersonalTrainerRepository, PersonalTrainerRepositoryMongoDb>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazor",
+        policy =>
+        {
+            policy.AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowAnyOrigin();
+        });
+});
 
 
 var app = builder.Build();
@@ -140,7 +150,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowBlazor");
 app.UseAuthorization();
 
 app.MapControllers();
