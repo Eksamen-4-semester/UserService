@@ -54,7 +54,6 @@ try
     if (string.IsNullOrWhiteSpace(connectionString))
         throw new NullReferenceException("MONGO_CONNECTION_STRING not found");
     Console.WriteLine(connectionString);
-    // TODO set to "mongodb://localhost:27017/" in local dev without docker
     Environment.SetEnvironmentVariable("MONGO_CONNECTION_STRING", connectionString);
     
     string mongoDbName = mongoSecrets.Data.Data["MONGO_USER_DB"].ToString();

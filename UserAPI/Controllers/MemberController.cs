@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UserAPI.Models;
 using UserAPI.Models.ResultObjects;
@@ -75,18 +76,51 @@ public class MemberController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetMember(int memberId)
+    public async Task<IActionResult> GetMemberById(int memberId)
     {
-        _logger.LogInformation("Called {function} endpoint", nameof(GetMember));
+        _logger.LogInformation("Called {function} endpoint", nameof(GetMemberById));
         if (memberId <= 0)
         {
-            _logger.LogInformation("{function} called with invalid member id", nameof(GetMember));
+            _logger.LogInformation("{function} called with invalid member id", nameof(GetMemberById));
             return BadRequest("Invalid member id");
         }
         var member = await _memberRepository.GetMemberById(memberId);
         if (member == null)
         {
             _logger.LogInformation("Member with member id: {id} does not exist", memberId);
+            return NotFound();
+        }
+        return Ok(member);
+    }
+    
+    [Authorize]
+    [HttpGet]
+    [Route("own")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetOwnMemberByJwt()
+    {
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            _logger.LogError("Users id claim not found in token");
+            return Unauthorized();
+        }
+        
+        var memberId = int.Parse(userIdClaim.Value);
+        
+        _logger.LogInformation("Called {function} endpoint", nameof(GetOwnMemberByJwt));
+        if (memberId <= 0)
+        {
+            _logger.LogInformation("{function} called with invalid user id", nameof(GetOwnMemberByJwt));
+            return BadRequest("Invalid user id");
+        }
+        var member = await _memberRepository.GetMemberById(memberId);
+        if (member == null)
+        {
+            _logger.LogInformation("Member with user id: {id} does not exist", memberId);
             return NotFound();
         }
         return Ok(member);
