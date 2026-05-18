@@ -60,6 +60,17 @@ public class MemberController : ControllerBase
             _logger.LogInformation("Create request failed");
             return BadRequest("Full name, Username and Password are required");
         }
+
+        if (member.DOB > DateTime.UtcNow)
+        {
+            _logger.LogInformation("Create request failed, DOB cannot be greater than current time");
+            return BadRequest("DOB cannot be greater than current time");
+        }
+        if (member.DOB == null)
+        {
+            _logger.LogInformation("Create request failed, DOB cannot be null");
+            return BadRequest("DOB must exist");
+        }
         _logger.LogInformation("Creating member: {Username}", member.Username);
         var wasAdded = await _memberRepository.CreateNewMember(member);
         if (wasAdded)
