@@ -50,9 +50,19 @@ try
     
     Secret<SecretData> mongoSecrets = await vaultClient.V1.Secrets.KeyValue.V2
         .ReadSecretAsync(path: "mongo", mountPoint: "secret");
-    string connectionString = mongoSecrets.Data.Data["MONGO_CONNECTION_STRING"].ToString();
-    if (string.IsNullOrWhiteSpace(connectionString))
-        throw new NullReferenceException("MONGO_CONNECTION_STRING not found");
+    
+    string connectionString;
+    if (Environment.GetEnvironmentVariable("DOCKER") != null)
+    {
+        connectionString = mongoSecrets
+                               .Data.Data["MONGO_CONNECTION_STRING"]?.ToString()
+                           ?? throw new NullReferenceException(
+                               "MONGO_CONNECTION_STRING not found in Vault");
+    }
+    else
+    {
+        connectionString = "mongodb://admin:secret123@localhost:27017/?authSource=admin";
+    }
     Console.WriteLine(connectionString);
     Environment.SetEnvironmentVariable("MONGO_CONNECTION_STRING", connectionString);
     
