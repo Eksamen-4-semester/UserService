@@ -14,10 +14,10 @@ public class PersonalTrainerRepositoryMongoDb : IPersonalTrainerRepository
     public PersonalTrainerRepositoryMongoDb(
         IHttpClientFactory httpClientFactory,
         ILogger<PersonalTrainerRepositoryMongoDb> logger,
-        IMongoCollection<PersonalTrainer> personalTrainerCollection)
+        IMongoDatabase database)
     {
         _logger = logger;
-        _personalTrainerCollection = personalTrainerCollection;
+        _personalTrainerCollection = database.GetCollection<PersonalTrainer>("PersonalTrainer");
         _httpClientFactory = httpClientFactory;
     }
     
