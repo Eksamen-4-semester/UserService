@@ -100,9 +100,12 @@ public class AdminRepositoryMongoDb : IAdminRepository
         }
     }
 
-    public Task<Admin?> GetAdminById(int id)
+    public async Task<Admin?> GetAdminById(int id)
     {
-        throw new NotImplementedException();
+        var filter = Builders<Admin>.Filter.Eq("_id", id);
+        var projection = Builders<Admin>.Projection.Exclude("Password");
+        return await _adminCollection.Find(filter).Project<Admin>(projection).FirstOrDefaultAsync();
+
     }
     
     private async Task<Admin?> GetAdminByUsername(string username)
@@ -114,7 +117,7 @@ public class AdminRepositoryMongoDb : IAdminRepository
     
     private async Task<int> GetMaxId()
     {
-        _logger.LogDebug("GetMaxId called from AdminRepositoryMongoDb");
+        _logger.LogDebug($"GetMaxId called from {nameof(AdminRepositoryMongoDb)}");
         
         try
         {
